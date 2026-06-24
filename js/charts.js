@@ -3,18 +3,18 @@
    ═════════════════════════════════════════════════════════════ */
 
 const CHART_COLORS = {
-  good: '#4caf50',
-  fair: '#ffb74d',
-  poor: '#e53935',
+  good: '#6a9f7a',
+  fair: '#c49a5a',
+  poor: '#c45a5a',
   accent: '#2c5f6e',
-  accentLight: 'rgba(44,95,110,0.15)',
+  accentLight: 'rgba(44,95,110,0.12)',
   gold: '#c4a35a',
   grey: '#9ca3a8',
   text: '#646a70',
 
   groups: [
     '#2c5f6e', '#5b8a9c', '#8db4c4',
-    '#c4a35a', '#a0823e',
+    '#b8a06e', '#8a7a5a',
   ],
 };
 

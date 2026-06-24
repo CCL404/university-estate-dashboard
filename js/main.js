@@ -54,11 +54,10 @@ function renderTable(buildings) {
       <td>${condBadge(b.condition)}</td>
       <td>${b.fci}</td>
       <td>${fmtCurrency(b.total_renewal_need)}</td>
-      <td>${fmtCurrency(b.crv)}</td>
       <td style="color:${riskColor(b.risk_band)};font-weight:${b.risk_band==='High'?600:400}">${b.risk_band}</td>
       <td>${b.estimated_renewal_year}</td>
-      <td><span style="color:${actionColor(b.recommended_action)};font-size:0.75rem;">${esc(b.recommended_action || '—')}</span></td>
-      <td>#${b.investment_priority_rank}</td>
+      <td><span style="color:${actionColor(b.recommended_action)};font-size:0.72rem;">${esc(b.recommended_action || '—')}</span></td>
+      <td style="text-align:right;color:var(--text-muted);">#${b.investment_priority_rank}</td>
     </tr>
   `).join('');
 
