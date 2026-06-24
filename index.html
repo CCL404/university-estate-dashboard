@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>University Estate Asset Performance &amp; Renewal Dashboard</title>
+<meta name="description" content="Portfolio case study: asset condition assessment, renewal prioritisation, and capital planning for a university estate.">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+<!-- Styles -->
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ════ HERO ════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-tag">Portfolio Case Study · Asset Planning</div>
+    <h1>University Estate Asset Performance &amp; Renewal Dashboard</h1>
+    <p class="hero-subtitle">
+      A portfolio case study showing how facility condition and renewal data can be translated into investment-ready insights for a university estate context.
+    </p>
+    <div class="hero-meta">
+      <span><span class="dot"></span> 703 assets assessed</span>
+      <span><span class="dot"></span> 5 campus categories</span>
+      <span><span class="dot"></span> Condition · FCI · Backlog · Priority</span>
+      <span><span class="dot"></span> Renewal horizon: 2026–2051</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════ BUSINESS OBJECTIVE ════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Business Objective</h2>
+    </div>
+    <div style="max-width:780px;">
+      <p style="font-size:1rem;line-height:1.65;color:var(--text-secondary);">
+        This dashboard is designed to identify which buildings should be prioritised for renewal based on condition, backlog exposure, and portfolio impact. It supports asset performance review, lifecycle planning, and capital prioritisation in an institutional property setting.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ════ KPI ════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Executive Summary</h2>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card accent">
+        <div class="kpi-value" id="kpi-avg-fci">—</div>
+        <div class="kpi-label">Average FCI</div>
+        <div class="kpi-sub">Portfolio condition index</div>
+      </div>
+      <div class="kpi-card accent">
+        <div class="kpi-value" id="kpi-total-need">—</div>
+        <div class="kpi-label">Total Renewal Need</div>
+        <div class="kpi-sub">Deferred maintenance + capital</div>
+      </div>
+      <div class="kpi-card warning">
+        <div class="kpi-value" id="kpi-high-risk">—</div>
+        <div class="kpi-label">High-Risk Buildings</div>
+        <div class="kpi-sub">Priority score ≥ 55</div>
+      </div>
+      <div class="kpi-card warning">
+        <div class="kpi-value" id="kpi-poor-pct">—</div>
+        <div class="kpi-label">In Poor Condition</div>
+        <div class="kpi-sub">Share of total portfolio</div>
+      </div>
+      <div class="kpi-card accent">
+        <div class="kpi-value" id="kpi-3yr-need">—</div>
+        <div class="kpi-label">3-Year Priority Investment</div>
+        <div class="kpi-sub">Due by 2029</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ KEY INSIGHTS ════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Key Insights</h2>
+    </div>
+    <div class="insights-list">
+      <div class="insight-item" data-index="01">
+        <h3>Concentration of renewal demand</h3>
+        <p>The top 10% of buildings by priority score account for over 40% of total renewal need. A targeted intervention strategy focused on the highest-scoring assets could deliver disproportionate portfolio improvement.</p>
+      </div>
+      <div class="insight-item" data-index="02">
+        <h3>Condition–priority misalignment</h3>
+        <p>Several assets categorised as Fair condition carry higher priority scores than some Poor-rated buildings, driven by large capital renewal needs and backlog intensity. Condition alone is insufficient for prioritisation.</p>
+      </div>
+      <div class="insight-item" data-index="03">
+        <h3>Front-loaded renewal pressure</h3>
+        <p>Nearly half of the total renewal need is concentrated within the next five years. This indicates a significant proportion of the estate is approaching or has exceeded its effective service life, requiring immediate capital allocation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ DASHBOARD VISUALS ════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Dashboard Visuals</h2>
+    </div>
+
+    <div class="chart-grid">
+
+      <!-- Condition distribution -->
+      <div class="chart-block">
+        <h3>Condition Distribution</h3>
+        <p class="chart-desc">How is the portfolio spread across condition bands?</p>
+        <div class="chart-wrap" style="height:260px;">
+          <canvas id="chart-condition"></canvas>
+        </div>
+      </div>
+
+      <!-- Priority scatter -->
+      <div class="chart-block">
+        <h3>Priority Scatter</h3>
+        <p class="chart-desc">Which assets combine high FCI with high backlog intensity?</p>
+        <div class="chart-wrap" style="height:260px;">
+          <canvas id="chart-scatter"></canvas>
+        </div>
+      </div>
+
+      <!-- Top priority buildings -->
+      <div class="chart-block">
+        <h3>Top Priority Buildings</h3>
+        <p class="chart-desc">Which buildings score highest on the composite priority index?</p>
+        <div class="chart-wrap" style="height:300px;">
+          <canvas id="chart-top"></canvas>
+        </div>
+      </div>
+
+      <!-- Renewal timeline -->
+      <div class="chart-block">
+        <h3>Renewal Forecast</h3>
+        <p class="chart-desc">When is renewal demand expected to peak?</p>
+        <div class="chart-wrap" style="height:260px;">
+          <canvas id="chart-timeline"></canvas>
+        </div>
+      </div>
+
+      <!-- Asset table -->
+      <div class="chart-block full">
+        <h3>Asset Detail</h3>
+        <p class="chart-desc">Browse and filter the full asset register.</p>
+        <div class="table-controls">
+          <select id="filter-group" onchange="filterTable()">
+            <option value="">All groups</option>
+          </select>
+          <select id="filter-risk" onchange="filterTable()">
+            <option value="">All risk levels</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+          <input type="text" id="filter-search" placeholder="Search building…" oninput="filterTable()">
+          <button onclick="resetFilters()" style="font-family:var(--font-body);font-size:0.75rem;padding:0.35rem 0.6rem;border:1px solid var(--border);background:var(--card);color:var(--text-secondary);cursor:pointer;">Reset</button>
+          <small id="table-row-count" style="margin-left:auto;"></small>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="sortTable('building_name')">Building</th>
+                <th onclick="sortTable('campus_group')">Group</th>
+                <th onclick="sortTable('condition')">Condition</th>
+                <th onclick="sortTable('fci')">FCI</th>
+                <th onclick="sortTable('total_renewal_need')">Renewal Need</th>
+                <th onclick="sortTable('crv')">CRV</th>
+                <th onclick="sortTable('risk_band')">Risk</th>
+                <th onclick="sortTable('estimated_renewal_year')">Renewal Year</th>
+                <th onclick="sortTable('recommended_action')">Action</th>
+                <th onclick="sortTable('investment_priority_rank')">Pri. Rank</th>
+              </tr>
+            </thead>
+            <tbody id="asset-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════ DATA & METHOD ════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Data &amp; Method</h2>
+    </div>
+    <div class="method-grid">
+      <div class="method-card" style="grid-column:1/-1;">
+        <p style="font-size:0.9rem;line-height:1.65;margin-bottom:0;">
+          The dashboard uses a cleaned facility dataset with condition, FCI, area, backlog, and renewal-related fields, then derives priority-oriented metrics such as risk band, total renewal need, estimated renewal timing, and recommended action. Priority score combines condition, renewal need, and portfolio impact to support indicative ranking. The portfolio has been adapted into a university estate scenario for analytical demonstration purposes.
+        </p>
+      </div>
+      <div class="method-card">
+        <h3>Derived fields</h3>
+        <ul>
+          <li><strong>Priority Score</strong> — weighted composite: FCI (35%), condition band (30%), backlog intensity (20%), asset age (15%)</li>
+          <li><strong>Risk Band</strong> — High (score ≥ 55), Medium (score 25–54), Low (score &lt; 25)</li>
+          <li><strong>Total Renewal Need</strong> — capital renewal requirements + deferred maintenance backlog</li>
+          <li><strong>Backlog per sqm</strong> — total renewal need normalised by gross floor area</li>
+          <li><strong>Estimated Renewal Year</strong> — modelled from risk band and remaining useful life</li>
+          <li><strong>CRV</strong> — derived from FCI and capital requirements; sqft-based fallback for incomplete records</li>
+        </ul>
+      </div>
+      <div class="method-card">
+        <h3>Asset categorisation</h3>
+        <ul>
+          <li>Buildings grouped into five university-relevant categories: teaching, admin, labs, student facilities, and sports</li>
+          <li>Age bands: Modern (&lt;10 yrs), New (10–20), Mid-life (21–30), Aging (31–50), Mature (51–75), Heritage (&gt;75)</li>
+          <li>Stakeholder ownership mapped to university organisational units</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FOOTER ════ -->
+<footer class="footer">
+  <div class="container">
+    University Estate Asset Performance &amp; Renewal Dashboard &nbsp;·&nbsp; Portfolio Case Study
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="js/main.js"></script>
+<script src="js/charts.js"></script>
+</body>
+</html>
