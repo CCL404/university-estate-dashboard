@@ -369,3 +369,43 @@ function renderComponentCharts(compJson) {
     },
   });
 }
+
+/* ═════════════════════════════════════════════════════════════
+   Sustainability Charts
+   ═════════════════════════════════════════════════════════════ */
+
+function renderSustainabilityCharts(sustJson) {
+  const { buildings, summary } = sustJson;
+  const condOrder = ['Good', 'Fair', 'Poor', 'Critical'];
+  const condAvg = condOrder.map(cond => {
+    const bldgs = buildings.filter(b => b.condition === cond);
+    return bldgs.length ? Math.round(bldgs.reduce((s, b) => s + b.energy_kwh_per_sqm, 0) / bldgs.length) : 0;
+  });
+  new Chart(document.getElementById('chart-sust-energy'), {
+    type: 'bar',
+    data: { labels: condOrder, datasets: [{ data: condAvg, backgroundColor: ['#6a9f7a','#c49a5a','#c45a5a','#8b2020'], borderRadius: 0, barThickness: 50 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y + ' kWh/sqm' } } },
+      scales: { x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 }, color: CHART_COLORS.text } }, y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 }, color: CHART_COLORS.text } } } },
+  });
+  const bands = [{ label: 'Poor (0-30)', min: 0, max: 30 }, { label: 'Below Avg (31-45)', min: 31, max: 45 }, { label: 'Average (46-60)', min: 46, max: 60 }, { label: 'Good (61-75)', min: 61, max: 75 }, { label: 'Excellent (76+)', min: 76, max: 100 }];
+  new Chart(document.getElementById('chart-sust-score'), {
+    type: 'bar',
+    data: { labels: bands.map(b => b.label), datasets: [{ data: bands.map(b => buildings.filter(s => s.sustainability_score >= b.min && s.sustainability_score <= b.max).length), backgroundColor: ['#8b2020','#c45a5a','#c49a5a','#6a9f7a','#2c5f6e'], borderRadius: 0, barThickness: 40 }] },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y + ' buildings' } } },
+      scales: { x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 }, color: CHART_COLORS.text } }, y: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 9 }, color: CHART_COLORS.text } } } },
+  });
+  const groups = [...new Set(buildings.map(b => b.campus_group).filter(Boolean))];
+  const carbonData = groups.map(g => ({ label: g, val: Math.round(buildings.filter(b => b.campus_group === g).reduce((s, b) => s + b.carbon_kg, 0) / 1000) })).sort((a, b) => b.val - a.val);
+  new Chart(document.getElementById('chart-sust-carbon'), {
+    type: 'bar',
+    data: { labels: carbonData.map(d => d.label), datasets: [{ data: carbonData.map(d => d.val), backgroundColor: ['#2c5f6e','#5b8a9c','#8db4c4','#c49a5a','#c45a5a'], borderRadius: 0, barPercentage: 0.7 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y.toLocaleString() + 'k kg CO2-e' } } },
+      scales: { x: { grid: { display: false }, ticks: { font: { size: 9, family: 'Inter' }, color: CHART_COLORS.text, maxRotation: 45 } }, y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 }, color: CHART_COLORS.text } } } },
+  });
+  new Chart(document.getElementById('chart-sust-kpi'), {
+    type: 'bar',
+    data: { labels: ['Energy (kWh/sqm)', 'Water (kL/sqm)', 'Waste (kg/sqm)'], datasets: [{ data: [summary.avg_energy_kwh_per_sqm, Math.round(summary.total_water_kl / summary.total_sqm * 100) / 100, Math.round(summary.total_waste_kg / summary.total_sqm)], backgroundColor: ['#2c5f6e','#5b8a9c','#8db4c4'], borderRadius: 0, barThickness: 50 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 }, color: CHART_COLORS.text } }, y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 }, color: CHART_COLORS.text } } } },
+  });
+}

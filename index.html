@@ -286,6 +286,68 @@
   </div>
 </section>
 
+<!-- ════ SUSTAINABILITY ════ -->
+<section class="section reveal" id="sustainability">
+  <div class="container">
+    <div class="section-header">
+      <h2>Sustainability &amp; Environmental Performance</h2>
+    </div>
+
+    <div class="sust-kpi-grid reveal-stagger">
+      <div class="kpi-card">
+        <div class="kpi-value" id="sust-total-energy">—</div>
+        <div class="kpi-label">Annual Energy Use</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" id="sust-total-water">—</div>
+        <div class="kpi-label">Annual Water Use</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" id="sust-total-carbon">—</div>
+        <div class="kpi-label">Scope 2 Carbon</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" id="sust-avg-score">—</div>
+        <div class="kpi-label">Avg Sustainability Score</div>
+      </div>
+    </div>
+
+    <div class="chart-grid reveal-stagger" style="margin-top:1.5rem;">
+      <div class="chart-block">
+        <h3>Energy Intensity by Building Condition</h3>
+        <p class="chart-desc">Average kWh/sqm across Good, Fair, Poor, and Critical assets.</p>
+        <div class="chart-wrap" style="height:240px;">
+          <canvas id="chart-sust-energy"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-block">
+        <h3>Sustainability Score Distribution</h3>
+        <p class="chart-desc">Number of buildings in each score band.</p>
+        <div class="chart-wrap" style="height:240px;">
+          <canvas id="chart-sust-score"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-block">
+        <h3>Carbon by Campus Group</h3>
+        <p class="chart-desc">Annual scope 2 carbon emissions by campus portfolio.</p>
+        <div class="chart-wrap" style="height:240px;">
+          <canvas id="chart-sust-carbon"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-block">
+        <h3>Environmental KPI Summary</h3>
+        <p class="chart-desc">Normalised sustainability KPIs — kWh/sqm, kL/sqm, kg CO2-e/sqm.</p>
+        <div class="chart-wrap" style="height:240px;">
+          <canvas id="chart-sust-kpi"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ════ DATA & METHOD ════ -->
 <section class="section reveal">
   <div class="container">
@@ -295,7 +357,7 @@
     <!-- Methodology disclaimer -->
     <div class="disclaimer-card reveal-stagger">
       <span class="disclaimer-label">Note</span>
-      <span class="disclaimer-text">This dashboard uses <strong>synthesised portfolio data</strong> for demonstration purposes. Metrics, building names, and financial figures do not represent any real institution. The analytical methodology — FCI-based condition profiling, backlog intensity scoring, composite priority modelling, and renewal forecasting — is designed to be transferable to live asset datasets. <strong>Built with Chart.js · data processed in Python</strong>.</span>
+      <span class="disclaimer-text">This dashboard uses <strong>synthesised portfolio data</strong> for demonstration purposes. Metrics, building names, and financial figures do not represent any real institution. The analytical methodology — FCI-based condition profiling, backlog intensity scoring, composite priority modelling, renewal forecasting, and component lifecycle analysis — follows principles aligned with <strong>ISO 55000</strong> asset management standards. Sustainability metrics are modelled from building characteristics to demonstrate environmental performance monitoring capabilities. <strong>Built with Chart.js · data processed in Python</strong>.</span>
     </div>
 
     <div class="method-strip reveal-stagger">

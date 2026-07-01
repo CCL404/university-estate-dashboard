@@ -271,6 +271,28 @@ async function init() {
       }
     }
 
+    // ── Load Sustainability Data ──────────────────────────
+    try {
+      const res = await fetch('data/sustainability.json?t=' + CACHE_BUST);
+      const sustJson = await res.json();
+      const s = sustJson.summary;
+
+      // Sustainability KPIs
+      const fmtE = v => v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : (v / 1e3).toFixed(0) + 'k';
+      const fmtW = v => v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(0) + 'k' : v;
+      document.getElementById('sust-total-energy').textContent = fmtE(s.total_energy_kwh) + ' kWh';
+      document.getElementById('sust-total-water').textContent = fmtW(s.total_water_kl) + ' kL';
+      document.getElementById('sust-total-carbon').textContent = fmtE(s.total_carbon_kg) + ' kg';
+      document.getElementById('sust-avg-score').textContent = s.avg_sustainability_score + '/100';
+
+      // Render sustainability charts
+      if (typeof renderSustainabilityCharts === 'function') {
+        renderSustainabilityCharts(sustJson);
+      }
+    } catch (e) {
+      console.warn('Sustainability data not loaded:', e.message);
+    }
+
   } catch (e) {
     console.error('Failed to load data:', e);
     document.body.innerHTML = `
