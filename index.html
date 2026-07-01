@@ -136,6 +136,45 @@
       </div>
 
     </div>
+
+    <!-- Asset Register -->
+    <div class="chart-block" style="margin-top:1rem;">
+      <h3>Asset Register</h3>
+      <p class="chart-desc">Filter and sort the full building portfolio.</p>
+      <div class="table-controls">
+        <select id="filter-group" onchange="filterTable()">
+          <option value="">All groups</option>
+        </select>
+        <select id="filter-risk" onchange="filterTable()">
+          <option value="">All risk levels</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+        <input type="text" id="filter-search" placeholder="Search building…" oninput="filterTable()">
+        <button onclick="resetFilters()" class="table-btn">Reset</button>
+        <small id="table-row-count" style="margin-left:auto;"></small>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortTable('building_name')">Building</th>
+              <th onclick="sortTable('campus_group')">Group</th>
+              <th onclick="sortTable('condition')">Condition</th>
+              <th onclick="sortTable('fci')">FCI</th>
+              <th onclick="sortTable('total_renewal_need')">Need</th>
+              <th onclick="sortTable('risk_band')">Risk</th>
+              <th onclick="sortTable('estimated_renewal_year')">Renewal</th>
+              <th onclick="sortTable('recommended_action')">Action</th>
+              <th onclick="sortTable('investment_priority_rank')">Rank</th>
+            </tr>
+          </thead>
+          <tbody id="asset-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 </section>
 
