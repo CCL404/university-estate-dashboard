@@ -21,37 +21,63 @@ buildings = fac_data['buildings']
 # ── 1. Spread building renewals with budget constraint ────────
 def spread_budget(items, budget_key, year_key, annual_budget, start_year=2026, horizon=25):
     """Spread items across years respecting annual budget cap.
-    If total need exceeds budget capacity, excess is spread proportionally
-    across the horizon instead of dumping to the last year."""
+    If total need exceeds budget capacity, excess is spread proportionally.
+    Very large items (>$50M) are phased across multiple years for realistic smoothing."""
     sorted_items = sorted(items, key=lambda x: x.get('priority_score', 0) or 0, reverse=True)
     
-    # Calculate total budget capacity with 2% growth
     total_capacity = sum(annual_budget * (1.02 ** i) for i in range(horizon))
     total_need = sum(item.get(budget_key, 0) or 0 for item in sorted_items)
-    
-    # If need exceeds capacity, scale by a multiplier to allow phased overrun
     overrun_ratio = max(1.0, total_need / total_capacity) if total_capacity > 0 else 1.0
     
     year_costs = defaultdict(float)
+    PHASE_THRESHOLD = 50_000_000  # Buildings over $50M get phased
     
     for item in sorted_items:
         cost = item.get(budget_key, 0) or 0
-        assigned = False
-        for y in range(start_year, start_year + horizon):
-            # Allow scaled budget to spread the load
-            effective_budget = annual_budget * (1.02 ** (y - start_year)) * overrun_ratio
-            if year_costs[y] + cost <= effective_budget:
-                year_costs[y] += cost
-                item[year_key] = y
-                assigned = True
-                break
         
-        if not assigned:
-            # If still doesn't fit with scaling, spread across multiple years
-            # by finding the least-loaded year
-            best_y = min(range(start_year, start_year + horizon), key=lambda y: year_costs[y] + cost)
-            year_costs[best_y] += cost
-            item[year_key] = best_y
+        # Phase very large items across multiple years
+        if cost > PHASE_THRESHOLD:
+            num_phases = min(5, max(2, round(cost / (annual_budget * 0.8))))
+            phase_cost = cost / num_phases
+            
+            # Find best starting year for the phased item
+            best_start = None
+            best_max_load = float('inf')
+            
+            for start_y in range(start_year, start_year + horizon - num_phases):
+                max_load = 0
+                for p in range(num_phases):
+                    y = start_y + p
+                    effective = annual_budget * (1.02 ** (y - start_year)) * overrun_ratio
+                    load = (year_costs[y] + phase_cost) / effective
+                    max_load = max(max_load, load)
+                if max_load < best_max_load:
+                    best_max_load = max_load
+                    best_start = start_y
+            
+            if best_start is None:
+                best_start = start_year
+            
+            item['phase_count'] = num_phases
+            item[year_key] = best_start
+            item['phase_annual_cost'] = round(phase_cost)
+            
+            for p in range(num_phases):
+                year_costs[best_start + p] += phase_cost
+        else:
+            assigned = False
+            for y in range(start_year, start_year + horizon):
+                effective_budget = annual_budget * (1.02 ** (y - start_year)) * overrun_ratio
+                if year_costs[y] + cost <= effective_budget:
+                    year_costs[y] += cost
+                    item[year_key] = y
+                    assigned = True
+                    break
+            
+            if not assigned:
+                best_y = min(range(start_year, start_year + horizon), key=lambda y: year_costs[y] + cost)
+                year_costs[best_y] += cost
+                item[year_key] = best_y
     
     return items, dict(year_costs)
 
@@ -253,27 +279,53 @@ comp_overrun = max(1.0, total_comp_need / total_comp_capacity) if total_comp_cap
 
 year_costs = defaultdict(float)
 assigned = set()
+PHASE_THRESHOLD_COMP = 15_000_000  # Component groups over $15M get phased
 
 for priority, b_name, comps, total_cost in component_priority:
     if b_name in assigned:
         continue
     
-    assigned_year = None
-    for y in range(2026, 2051):
-        effective_budget = ANNUAL_COMPONENT_BUDGET * (1.02 ** (y - 2026)) * comp_overrun
-        if year_costs[y] + total_cost <= effective_budget:
-            assigned_year = y
-            break
+    if total_cost > PHASE_THRESHOLD_COMP:
+        num_phases = min(4, max(2, round(total_cost / (ANNUAL_COMPONENT_BUDGET * 0.6))))
+        phase_cost = total_cost / num_phases
+        
+        best_start = None
+        best_max_load = float('inf')
+        for start_y in range(2026, 2051 - num_phases):
+            max_load = 0
+            for p in range(num_phases):
+                y = start_y + p
+                effective = ANNUAL_COMPONENT_BUDGET * (1.02 ** (y - 2026)) * comp_overrun
+                load = (year_costs[y] + phase_cost) / effective
+                max_load = max(max_load, load)
+            if max_load < best_max_load:
+                best_max_load = max_load
+                best_start = start_y
+        
+        for i, comp in enumerate(comps):
+            phase_idx = min(num_phases - 1, i * num_phases // len(comps))
+            comp['estimated_replacement_year'] = best_start + phase_idx
+        
+        for p in range(num_phases):
+            year_costs[best_start + p] += phase_cost
     
-    if assigned_year is None:
-        best_y = min(range(2026, 2051), key=lambda y: year_costs[y] + total_cost)
-        assigned_year = best_y
+    else:
+        num_phases = 1
+        assigned_year = None
+        for y in range(2026, 2051):
+            effective = ANNUAL_COMPONENT_BUDGET * (1.02 ** (y - 2026)) * comp_overrun
+            if year_costs[y] + total_cost <= effective:
+                assigned_year = y
+                break
+        
+        if assigned_year is None:
+            assigned_year = min(range(2026, 2051), key=lambda y: year_costs[y] + total_cost)
+        
+        for comp in comps:
+            comp['estimated_replacement_year'] = assigned_year
+        
+        year_costs[assigned_year] += total_cost
     
-    for comp in comps:
-        comp['estimated_replacement_year'] = assigned_year
-        stagger = hash(comp['component_type']) % 3 - 1
-        comp['estimated_replacement_year'] = max(2026, min(2050, assigned_year + stagger))
-    year_costs[assigned_year] += total_cost
     assigned.add(b_name)
 
 # ── Summary ──────────────────────────────────────────────────
