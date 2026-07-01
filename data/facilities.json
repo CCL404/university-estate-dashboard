@@ -4618,7 +4618,7 @@
       "recommended_action": "Renew within 1\u20132 years"
     },
     {
-      "building_name": "",
+      "building_name": "2600 Golf Course Drive (Balboa Golf Course)",
       "location_description": "2600 Golf Course Drive (Balboa Golf Course)",
       "asset_type": "Kiosk",
       "building_function": "KIOSK",
@@ -5032,7 +5032,7 @@
       "recommended_action": "Monitor"
     },
     {
-      "building_name": "",
+      "building_name": "2005 Pan American Plaza",
       "location_description": "2005 Pan American Plaza",
       "asset_type": "Kiosk",
       "building_function": "Parks/Recreation \u2013 Balboa Park",
@@ -9749,7 +9749,7 @@
       "recommended_action": "Monitor"
     },
     {
-      "building_name": "",
+      "building_name": "299 17th St.",
       "location_description": "299 17th St.",
       "asset_type": "Community Service Center",
       "building_function": "RECREATION CENTER",
@@ -15890,7 +15890,7 @@
       "recommended_action": "Renew within 3\u20135 years"
     },
     {
-      "building_name": "",
+      "building_name": "2600 Golf Course Drive (Balboa Golf Course)",
       "location_description": "2600 Golf Course Drive (Balboa Golf Course)",
       "asset_type": "Retail",
       "building_function": "SHOP",
