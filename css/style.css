@@ -315,6 +315,20 @@ a:hover { text-decoration: underline; }
 }
 .chart-wrap { position: relative; }
 
+/* ── Component KPIs ─────────────────────────────────────────── */
+.comp-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 1024px) {
+  .comp-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .comp-kpi-grid { grid-template-columns: 1fr; }
+}
+
 /* ── Table ────────────────────────────────────────────────── */
 .table-wrap { overflow-x: auto; }
 .table-controls {
@@ -384,6 +398,7 @@ tbody tr:hover { background: var(--accent-light); }
 .cond-good { background: #e8f5e9; color: #2e7d32; }
 .cond-fair { background: #fff8e1; color: #f57f17; }
 .cond-poor { background: #ffebee; color: #c62828; }
+.cond-critical { background: #fce4ec; color: #8b2020; }
 
 .risk-high { color: #c62828; font-weight: 600; }
 .risk-medium { color: #f57f17; font-weight: 500; }

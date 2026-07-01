@@ -6,6 +6,7 @@ const CHART_COLORS = {
   good: '#6a9f7a',
   fair: '#c49a5a',
   poor: '#c45a5a',
+  critical: '#8b2020',
   accent: '#2c5f6e',
   accentLight: 'rgba(44,95,110,0.12)',
   gold: '#c4a35a',
@@ -16,6 +17,8 @@ const CHART_COLORS = {
     '#2c5f6e', '#5b8a9c', '#8db4c4',
     '#b8a06e', '#8a7a5a',
   ],
+
+  compColors: ['#2c5f6e', '#5b8a9c', '#c49a5a', '#c45a5a', '#8b2020'],
 };
 
 function renderCharts(json) {
@@ -197,6 +200,107 @@ function renderCharts(json) {
               if (ctx.datasetIndex === 0) return `${ctx.parsed.y} buildings`;
               return `$${ctx.parsed.y}M renewal need`;
             },
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 10 }, color: CHART_COLORS.text },
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: { font: { size: 10 }, color: CHART_COLORS.text },
+        },
+      },
+    },
+  });
+}
+
+/* ═════════════════════════════════════════════════════════════
+   Component Charts
+   ═════════════════════════════════════════════════════════════ */
+
+function renderComponentCharts(compJson) {
+  const { components, summary } = compJson;
+
+  // ── Component Condition by Type (stacked bar) ─────────────
+  const types = [...new Set(components.map(c => c.component_type))].sort();
+  const condOrder = ['Good', 'Fair', 'Poor', 'Critical'];
+  const condColors = {'Good': CHART_COLORS.good, 'Fair': CHART_COLORS.fair, 'Poor': CHART_COLORS.poor, 'Critical': CHART_COLORS.critical};
+
+  const datasets = condOrder.map(cond => ({
+    label: cond,
+    data: types.map(t => components.filter(c => c.component_type === t && c.condition === cond).length),
+    backgroundColor: condColors[cond],
+    borderRadius: 0,
+    barPercentage: 0.85,
+  }));
+
+  new Chart(document.getElementById('chart-comp-condition'), {
+    type: 'bar',
+    data: { labels: types, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { font: { family: 'Inter', size: 10 }, color: CHART_COLORS.text, boxWidth: 12, padding: 12 },
+        },
+        tooltip: {
+          mode: 'index',
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          stacked: true,
+          grid: { display: false },
+          ticks: { font: { family: 'Inter', size: 9 }, color: CHART_COLORS.text, maxRotation: 45 },
+        },
+        y: {
+          stacked: true, beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: { font: { size: 10 }, color: CHART_COLORS.text },
+        },
+      },
+    },
+  });
+
+  // ── Component Renewal Cost by Year ─────────────────────────
+  const yearlyCost = {};
+  components.forEach(c => {
+    const y = c.estimated_replacement_year;
+    yearlyCost[y] = (yearlyCost[y] || 0) + c.estimated_renewal_cost;
+  });
+  const compYears = Object.keys(yearlyCost).sort();
+  const compYearData = compYears.map(y => ({
+    year: y,
+    cost: Math.round(yearlyCost[y] / 1e6),
+  }));
+
+  new Chart(document.getElementById('chart-comp-timeline'), {
+    type: 'bar',
+    data: {
+      labels: compYearData.map(d => d.year),
+      datasets: [{
+        label: 'Renewal Cost ($M)',
+        data: compYearData.map(d => d.cost),
+        backgroundColor: types.map((_, i) => CHART_COLORS.compColors[i % 5]),
+        borderRadius: 0,
+        barPercentage: 0.7,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `$${ctx.parsed.y}M component renewal`,
           },
         },
       },

@@ -135,40 +135,91 @@
         </div>
       </div>
 
-      <!-- Asset table -->
+    </div>
+  </div>
+</section>
+
+<!-- ════ COMPONENT LIFECYCLE ════ -->
+<section class="section reveal" id="components">
+  <div class="container">
+    <div class="section-header">
+      <h2>Component Lifecycle Analysis</h2>
+    </div>
+
+    <div class="comp-kpi-grid reveal-stagger">
+      <div class="kpi-card">
+        <div class="kpi-value" id="comp-total">—</div>
+        <div class="kpi-label">Components Tracked</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" id="comp-critical">—</div>
+        <div class="kpi-label">Poor / Critical</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" id="comp-total-cost">—</div>
+        <div class="kpi-label">Total Renewal Need</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" id="comp-avg-life">—</div>
+        <div class="kpi-label">Avg Component Age</div>
+      </div>
+    </div>
+
+    <div class="chart-grid reveal-stagger" style="margin-top:1.5rem;">
+
+      <!-- Component condition by type (stacked bar) -->
+      <div class="chart-block">
+        <h3>Component Condition by Type</h3>
+        <p class="chart-desc">Condition mix across HVAC, carpet, fire safety, and other asset categories.</p>
+        <div class="chart-wrap" style="height:280px;">
+          <canvas id="chart-comp-condition"></canvas>
+        </div>
+      </div>
+
+      <!-- Component renewal cost by year -->
+      <div class="chart-block">
+        <h3>Component Renewal Demand by Year</h3>
+        <p class="chart-desc">Forecast of component-level capital need over time.</p>
+        <div class="chart-wrap" style="height:280px;">
+          <canvas id="chart-comp-timeline"></canvas>
+        </div>
+      </div>
+
+      <!-- Component register -->
       <div class="chart-block full">
-        <h3>Asset Register</h3>
-        <p class="chart-desc">Filter and sort the full portfolio.</p>
+        <h3>Component Register</h3>
+        <p class="chart-desc">Browse components by type, condition, or building.</p>
         <div class="table-controls">
-          <select id="filter-group" onchange="filterTable()">
-            <option value="">All groups</option>
+          <select id="filter-comp-type" onchange="filterCompTable()">
+            <option value="">All types</option>
           </select>
-          <select id="filter-risk" onchange="filterTable()">
-            <option value="">All risk levels</option>
-            <option value="High">High</option>
-            <option value="Medium">Medium</option>
-            <option value="Low">Low</option>
+          <select id="filter-comp-condition" onchange="filterCompTable()">
+            <option value="">All conditions</option>
+            <option value="Critical">Critical</option>
+            <option value="Poor">Poor</option>
+            <option value="Fair">Fair</option>
+            <option value="Good">Good</option>
           </select>
-          <input type="text" id="filter-search" placeholder="Search building…" oninput="filterTable()">
-          <button onclick="resetFilters()" class="table-btn">Reset</button>
-          <small id="table-row-count" style="margin-left:auto;"></small>
+          <input type="text" id="filter-comp-search" placeholder="Search building…" oninput="filterCompTable()">
+          <button onclick="resetCompFilters()" class="table-btn">Reset</button>
+          <small id="comp-row-count" style="margin-left:auto;"></small>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th onclick="sortTable('building_name')">Building</th>
-                <th onclick="sortTable('campus_group')">Group</th>
-                <th onclick="sortTable('condition')">Condition</th>
-                <th onclick="sortTable('fci')">FCI</th>
-                <th onclick="sortTable('total_renewal_need')">Need</th>
-                <th onclick="sortTable('risk_band')">Risk</th>
-                <th onclick="sortTable('estimated_renewal_year')">Renewal</th>
-                <th onclick="sortTable('recommended_action')">Action</th>
-                <th onclick="sortTable('investment_priority_rank')">Rank</th>
+                <th onclick="sortCompTable('building_name')">Building</th>
+                <th onclick="sortCompTable('component_type')">Component</th>
+                <th onclick="sortCompTable('condition')">Condition</th>
+                <th onclick="sortCompTable('fci')">FCI</th>
+                <th onclick="sortCompTable('age_years')">Age (yrs)</th>
+                <th onclick="sortCompTable('estimated_replacement_year')">Replace</th>
+                <th onclick="sortCompTable('estimated_renewal_cost')">Cost</th>
+                <th onclick="sortCompTable('risk_band')">Risk</th>
+                <th onclick="sortCompTable('recommended_action')">Action</th>
               </tr>
             </thead>
-            <tbody id="asset-table-body"></tbody>
+            <tbody id="comp-table-body"></tbody>
           </table>
         </div>
       </div>

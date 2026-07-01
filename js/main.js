@@ -3,8 +3,11 @@
    ═════════════════════════════════════════════════════════════ */
 
 let DATA = null;
+let COMP_DATA = null;
 let SORT_COL = null;
 let SORT_DIR = 'asc';
+let COMP_SORT_COL = null;
+let COMP_SORT_DIR = 'asc';
 
 // ── Load data ────────────────────────────────────────────────
 async function loadData(path) {
@@ -12,6 +15,18 @@ async function loadData(path) {
   const json = await res.json();
   DATA = json;
   return json;
+}
+
+async function loadComponents(path) {
+  try {
+    const res = await fetch(path);
+    const json = await res.json();
+    COMP_DATA = json;
+    return json;
+  } catch (e) {
+    console.warn('Components data not loaded:', e.message);
+    return null;
+  }
 }
 
 // ── Format helpers ───────────────────────────────────────────
@@ -42,7 +57,7 @@ function renderKPI(summary) {
   document.getElementById('kpi-3yr-need').textContent = fmtCurrency(summary.three_year_priority_need);
 }
 
-// ── Table ────────────────────────────────────────────────────
+// ── Building Table ─────────────────────────────────────────
 function renderTable(buildings) {
   const tbody = document.getElementById('asset-table-body');
   const display = sortData([...buildings]);
@@ -107,6 +122,81 @@ function resetFilters() {
   renderTable(DATA.buildings);
 }
 
+// ── Component Table ─────────────────────────────────────────
+function renderCompTable(components) {
+  const tbody = document.getElementById('comp-table-body');
+  if (!tbody) return;
+  const display = sortCompData([...components]);
+  tbody.innerHTML = display.slice(0, 100).map(c => `
+    <tr>
+      <td><strong style="color:var(--text-primary);font-weight:500;">${esc(c.building_name)}</strong></td>
+      <td>${esc(c.component_type)}</td>
+      <td>${condBadge(c.condition)}</td>
+      <td>${c.fci}</td>
+      <td>${c.age_years}</td>
+      <td>${c.estimated_replacement_year}</td>
+      <td>${fmtCurrency(c.estimated_renewal_cost)}</td>
+      <td style="color:${riskColor(c.risk_band)};font-weight:${c.risk_band==='High'?600:400}">${c.risk_band}</td>
+      <td><span style="color:${actionColor(c.recommended_action)};font-size:0.72rem;">${esc(c.recommended_action)}</span></td>
+    </tr>
+  `).join('');
+  document.getElementById('comp-row-count').textContent = `${display.length} components`;
+}
+
+function sortCompData(arr) {
+  if (!COMP_SORT_COL) return arr;
+  return arr.sort((a, b) => {
+    let va = a[COMP_SORT_COL], vb = b[COMP_SORT_COL];
+    if (typeof va === 'string') {
+      va = va.toLowerCase(); vb = (vb || '').toLowerCase();
+    }
+    if (va == null) va = '';
+    if (vb == null) vb = '';
+    if (va < vb) return COMP_SORT_DIR === 'asc' ? -1 : 1;
+    if (va > vb) return COMP_SORT_DIR === 'asc' ? 1 : -1;
+    return 0;
+  });
+}
+
+function sortCompTable(col) {
+  if (COMP_SORT_COL === col) {
+    COMP_SORT_DIR = COMP_SORT_DIR === 'asc' ? 'desc' : 'asc';
+  } else {
+    COMP_SORT_COL = col;
+    COMP_SORT_DIR = 'asc';
+  }
+  renderCompTable(COMP_DATA.components);
+}
+
+function filterCompTable() {
+  if (!COMP_DATA) return;
+  const type = document.getElementById('filter-comp-type').value;
+  const cond = document.getElementById('filter-comp-condition').value;
+  const search = document.getElementById('filter-comp-search').value.toLowerCase();
+  let filtered = COMP_DATA.components;
+  if (type) filtered = filtered.filter(c => c.component_type === type);
+  if (cond) filtered = filtered.filter(c => c.condition === cond);
+  if (search) filtered = filtered.filter(c => c.building_name.toLowerCase().includes(search));
+  renderCompTable(filtered);
+}
+
+function resetCompFilters() {
+  document.getElementById('filter-comp-type').value = '';
+  document.getElementById('filter-comp-condition').value = '';
+  document.getElementById('filter-comp-search').value = '';
+  renderCompTable(COMP_DATA.components);
+}
+
+// ── Component KPI ──────────────────────────────────────────
+function renderCompKPI(summary) {
+  if (!document.getElementById('comp-total')) return;
+  document.getElementById('comp-total').textContent = fmtNum(summary.total_components);
+  document.getElementById('comp-critical').textContent = summary.critical_count;
+  document.getElementById('comp-total-cost').textContent = fmtCurrency(summary.total_renewal_cost);
+  // approximate avg age
+  document.getElementById('comp-avg-life').textContent = '—';
+}
+
 // ── Utils ────────────────────────────────────────────────────
 const esc = (s) => {
   const d = document.createElement('div');
@@ -115,7 +205,7 @@ const esc = (s) => {
 };
 
 const condBadge = (c) => {
-  const cls = c === 'Good' ? 'cond-good' : c === 'Fair' ? 'cond-fair' : 'cond-poor';
+  const cls = c === 'Good' ? 'cond-good' : c === 'Fair' ? 'cond-fair' : c === 'Poor' ? 'cond-poor' : 'cond-critical';
   return `<span class="cond-badge ${cls}">${c}</span>`;
 };
 
@@ -127,8 +217,8 @@ const riskColor = (r) => {
 
 const actionColor = (a) => {
   if (!a) return 'var(--text-muted)';
-  if (a.startsWith('Renew')) return '#c62828';
-  if (a === 'Monitor') return '#f57f17';
+  if (a.includes('urgent') || a.startsWith('Renew within 1')) return '#c62828';
+  if (a === 'Monitor' || a.startsWith('Renew within 3')) return '#f57f17';
   return '#2e7d32';
 };
 
@@ -139,7 +229,7 @@ async function init() {
     renderKPI(json.summary);
     renderTable(json.buildings);
 
-    // Populate filter dropdowns
+    // Populate building filter dropdowns
     const groups = [...new Set(json.buildings.map(b => b.campus_group).filter(Boolean))];
     const sel = document.getElementById('filter-group');
     groups.forEach(g => {
@@ -148,16 +238,40 @@ async function init() {
       sel.appendChild(opt);
     });
 
-    // Render charts (from charts.js)
+    // Render building charts
     if (typeof renderCharts === 'function') {
       renderCharts(json);
     }
+
+    // ── Load Component Data ────────────────────────────────
+    const compJson = await loadComponents('data/components.json');
+    if (compJson) {
+      renderCompKPI(compJson.summary);
+      renderCompTable(compJson.components);
+
+      // Populate component type filter
+      const compTypes = [...new Set(compJson.components.map(c => c.component_type))].sort();
+      const typeSel = document.getElementById('filter-comp-type');
+      if (typeSel) {
+        compTypes.forEach(t => {
+          const opt = document.createElement('option');
+          opt.value = t; opt.textContent = t;
+          typeSel.appendChild(opt);
+        });
+      }
+
+      // Render component charts
+      if (typeof renderComponentCharts === 'function') {
+        renderComponentCharts(compJson);
+      }
+    }
+
   } catch (e) {
     console.error('Failed to load data:', e);
     document.body.innerHTML = `
       <div style="max-width:600px;margin:4rem auto;padding:2rem;text-align:center;font-family:sans-serif;">
         <h2 style="margin-bottom:1rem;">Data load error</h2>
-        <p style="color:#666;">Could not load <code>data/facilities.json</code>. Make sure the file exists and is valid JSON.</p>
+        <p style="color:#666;">Could not load data files. Make sure <code>data/facilities.json</code> and <code>data/components.json</code> exist.</p>
         <p style="color:#666;font-size:0.85rem;">${e.message}</p>
       </div>`;
   }
