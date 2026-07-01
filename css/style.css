@@ -174,6 +174,41 @@ a:hover { text-decoration: underline; }
   background: var(--accent-muted);
 }
 
+/* ── Hero byline ──────────────────────────────────────────── */
+.hero-byline {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.02em;
+}
+.hero-byline strong { color: var(--text-primary); font-weight: 500; }
+
+/* ── Disclaimer card ───────────────────────────────────────── */
+.disclaimer-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #faf6ef;
+  border-left: 3px solid var(--gold);
+  margin-bottom: 1rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.disclaimer-label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  white-space: nowrap;
+  padding-top: 0.1rem;
+}
+.disclaimer-text strong { color: var(--text-primary); font-weight: 500; }
+
 /* ── Objective strip ───────────────────────────────────────── */
 .objective-strip {
   display: flex;
