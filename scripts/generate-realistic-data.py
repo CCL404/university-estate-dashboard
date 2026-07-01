@@ -20,19 +20,39 @@ buildings = fac_data['buildings']
 
 # ── 1. Spread building renewals with budget constraint ────────
 def spread_budget(items, budget_key, year_key, annual_budget, start_year=2026, horizon=25):
+    """Spread items across years respecting annual budget cap.
+    If total need exceeds budget capacity, excess is spread proportionally
+    across the horizon instead of dumping to the last year."""
     sorted_items = sorted(items, key=lambda x: x.get('priority_score', 0) or 0, reverse=True)
+    
+    # Calculate total budget capacity with 2% growth
+    total_capacity = sum(annual_budget * (1.02 ** i) for i in range(horizon))
+    total_need = sum(item.get(budget_key, 0) or 0 for item in sorted_items)
+    
+    # If need exceeds capacity, scale by a multiplier to allow phased overrun
+    overrun_ratio = max(1.0, total_need / total_capacity) if total_capacity > 0 else 1.0
+    
     year_costs = defaultdict(float)
+    
     for item in sorted_items:
         cost = item.get(budget_key, 0) or 0
         assigned = False
         for y in range(start_year, start_year + horizon):
-            if year_costs[y] + cost <= annual_budget * (1.02 ** (y - start_year)):
+            # Allow scaled budget to spread the load
+            effective_budget = annual_budget * (1.02 ** (y - start_year)) * overrun_ratio
+            if year_costs[y] + cost <= effective_budget:
                 year_costs[y] += cost
                 item[year_key] = y
                 assigned = True
                 break
+        
         if not assigned:
-            item[year_key] = start_year + horizon - 1
+            # If still doesn't fit with scaling, spread across multiple years
+            # by finding the least-loaded year
+            best_y = min(range(start_year, start_year + horizon), key=lambda y: year_costs[y] + cost)
+            year_costs[best_y] += cost
+            item[year_key] = best_y
+    
     return items, dict(year_costs)
 
 buildings, bldg_year_costs = spread_budget(
@@ -227,6 +247,10 @@ for b_name, comps in building_comp_map.items():
 
 component_priority.sort(key=lambda x: x[0], reverse=True)
 
+total_comp_need = sum(p[3] for p in component_priority)
+total_comp_capacity = sum(ANNUAL_COMPONENT_BUDGET * (1.02 ** i) for i in range(25))
+comp_overrun = max(1.0, total_comp_need / total_comp_capacity) if total_comp_capacity > 0 else 1.0
+
 year_costs = defaultdict(float)
 assigned = set()
 
@@ -236,15 +260,17 @@ for priority, b_name, comps, total_cost in component_priority:
     
     assigned_year = None
     for y in range(2026, 2051):
-        if year_costs[y] + total_cost <= ANNUAL_COMPONENT_BUDGET * (1.02 ** (y - 2026)):
+        effective_budget = ANNUAL_COMPONENT_BUDGET * (1.02 ** (y - 2026)) * comp_overrun
+        if year_costs[y] + total_cost <= effective_budget:
             assigned_year = y
             break
+    
     if assigned_year is None:
-        assigned_year = 2050
+        best_y = min(range(2026, 2051), key=lambda y: year_costs[y] + total_cost)
+        assigned_year = best_y
     
     for comp in comps:
         comp['estimated_replacement_year'] = assigned_year
-        # Slight stagger per component type within a building
         stagger = hash(comp['component_type']) % 3 - 1
         comp['estimated_replacement_year'] = max(2026, min(2050, assigned_year + stagger))
     year_costs[assigned_year] += total_cost
