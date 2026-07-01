@@ -289,7 +289,7 @@ function renderComponentCharts(compJson) {
       datasets: [{
         label: 'Renewal Cost ($M)',
         data: compYearData.map(d => d.cost),
-        backgroundColor: types.map((_, i) => CHART_COLORS.compColors[i % 5]),
+        backgroundColor: '#2c5f6e',
         borderRadius: 0,
         barPercentage: 0.7,
       }],
@@ -311,6 +311,57 @@ function renderComponentCharts(compJson) {
         },
         y: {
           beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: { font: { size: 10 }, color: CHART_COLORS.text },
+        },
+      },
+    },
+  });
+
+  // ── 3. Component Condition by Floor Level ──────────────
+  const floorOrder = ['G', '1', '2', '3', '4', 'All'];
+  const floorLabels = ['Level G', 'Level 1', 'Level 2', 'Level 3', 'Level 4', 'Whole Bldg'];
+  const floorCondOrder = ['Good', 'Fair', 'Poor', 'Critical'];
+
+  const floorData = floorOrder.map(fl => {
+    const items = components.filter(c => (c.floor_level || '') === fl);
+    return floorCondOrder.map(cond => items.filter(c => c.condition === cond).length);
+  });
+
+  const floorChart = new Chart(document.getElementById('chart-comp-floor'), {
+    type: 'bar',
+    data: {
+      labels: floorLabels,
+      datasets: floorCondOrder.map((cond, i) => ({
+        label: cond,
+        data: floorData.map(d => d[i]),
+        backgroundColor: condColors[cond],
+        borderRadius: 0,
+        barPercentage: 0.8,
+      })),
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { font: { family: 'Inter', size: 10 }, color: CHART_COLORS.text, boxWidth: 12, padding: 12 },
+        },
+        tooltip: {
+          mode: 'index',
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          stacked: true,
+          grid: { display: false },
+          ticks: { font: { family: 'Inter', size: 10 }, color: CHART_COLORS.text },
+        },
+        y: {
+          stacked: true, beginAtZero: true,
           grid: { color: 'rgba(0,0,0,0.04)' },
           ticks: { font: { size: 10 }, color: CHART_COLORS.text },
         },

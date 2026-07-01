@@ -191,16 +191,16 @@
         <div class="kpi-label">Components Tracked</div>
       </div>
       <div class="kpi-card">
+        <div class="kpi-value" id="comp-zones">—</div>
+        <div class="kpi-label">Floors / Zones</div>
+      </div>
+      <div class="kpi-card">
         <div class="kpi-value" id="comp-critical">—</div>
         <div class="kpi-label">Poor / Critical</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-value" id="comp-total-cost">—</div>
         <div class="kpi-label">Total Renewal Need</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-value" id="comp-avg-life">—</div>
-        <div class="kpi-label">Avg Component Age</div>
       </div>
     </div>
 
@@ -224,6 +224,15 @@
         </div>
       </div>
 
+      <!-- Component condition by floor/zone -->
+      <div class="chart-block">
+        <h3>Component Condition by Floor Level</h3>
+        <p class="chart-desc">Condition mix across building levels. Filter by a specific building in the register below.</p>
+        <div class="chart-wrap" style="height:280px;">
+          <canvas id="chart-comp-floor"></canvas>
+        </div>
+      </div>
+
       <!-- Component register -->
       <div class="chart-block full">
         <h3>Component Register</h3>
@@ -239,6 +248,15 @@
             <option value="Fair">Fair</option>
             <option value="Good">Good</option>
           </select>
+          <select id="filter-comp-floor" onchange="filterCompTable()">
+            <option value="">All floors</option>
+            <option value="G">Level G</option>
+            <option value="1">Level 1</option>
+            <option value="2">Level 2</option>
+            <option value="3">Level 3</option>
+            <option value="4">Level 4</option>
+            <option value="All">Entire Building</option>
+          </select>
           <input type="text" id="filter-comp-search" placeholder="Search building…" oninput="filterCompTable()">
           <button onclick="resetCompFilters()" class="table-btn">Reset</button>
           <small id="comp-row-count" style="margin-left:auto;"></small>
@@ -248,14 +266,15 @@
             <thead>
               <tr>
                 <th onclick="sortCompTable('building_name')">Building</th>
+                <th onclick="sortCompTable('floor_level')">Floor</th>
+                <th onclick="sortCompTable('zone_name')">Zone</th>
                 <th onclick="sortCompTable('component_type')">Component</th>
                 <th onclick="sortCompTable('condition')">Condition</th>
                 <th onclick="sortCompTable('fci')">FCI</th>
-                <th onclick="sortCompTable('age_years')">Age (yrs)</th>
+                <th onclick="sortCompTable('age_years')">Age</th>
                 <th onclick="sortCompTable('estimated_replacement_year')">Replace</th>
                 <th onclick="sortCompTable('estimated_renewal_cost')">Cost</th>
                 <th onclick="sortCompTable('risk_band')">Risk</th>
-                <th onclick="sortCompTable('recommended_action')">Action</th>
               </tr>
             </thead>
             <tbody id="comp-table-body"></tbody>

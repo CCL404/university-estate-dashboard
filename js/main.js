@@ -130,6 +130,8 @@ function renderCompTable(components) {
   tbody.innerHTML = display.slice(0, 100).map(c => `
     <tr>
       <td><strong style="color:var(--text-primary);font-weight:500;">${esc(c.building_name)}</strong></td>
+      <td style="color:var(--text-muted);font-size:0.72rem;">${c.floor_display || c.floor_level || '—'}</td>
+      <td style="color:var(--text-secondary);font-size:0.72rem;">${esc(c.zone_name || '—')}</td>
       <td>${esc(c.component_type)}</td>
       <td>${condBadge(c.condition)}</td>
       <td>${c.fci}</td>
@@ -137,7 +139,6 @@ function renderCompTable(components) {
       <td>${c.estimated_replacement_year}</td>
       <td>${fmtCurrency(c.estimated_renewal_cost)}</td>
       <td style="color:${riskColor(c.risk_band)};font-weight:${c.risk_band==='High'?600:400}">${c.risk_band}</td>
-      <td><span style="color:${actionColor(c.recommended_action)};font-size:0.72rem;">${esc(c.recommended_action)}</span></td>
     </tr>
   `).join('');
   document.getElementById('comp-row-count').textContent = `${display.length} components`;
@@ -172,10 +173,12 @@ function filterCompTable() {
   if (!COMP_DATA) return;
   const type = document.getElementById('filter-comp-type').value;
   const cond = document.getElementById('filter-comp-condition').value;
+  const floor = document.getElementById('filter-comp-floor').value;
   const search = document.getElementById('filter-comp-search').value.toLowerCase();
   let filtered = COMP_DATA.components;
   if (type) filtered = filtered.filter(c => c.component_type === type);
   if (cond) filtered = filtered.filter(c => c.condition === cond);
+  if (floor) filtered = filtered.filter(c => (c.floor_level || '') === floor);
   if (search) filtered = filtered.filter(c => c.building_name.toLowerCase().includes(search));
   renderCompTable(filtered);
 }
@@ -183,6 +186,7 @@ function filterCompTable() {
 function resetCompFilters() {
   document.getElementById('filter-comp-type').value = '';
   document.getElementById('filter-comp-condition').value = '';
+  document.getElementById('filter-comp-floor').value = '';
   document.getElementById('filter-comp-search').value = '';
   renderCompTable(COMP_DATA.components);
 }
@@ -191,10 +195,9 @@ function resetCompFilters() {
 function renderCompKPI(summary) {
   if (!document.getElementById('comp-total')) return;
   document.getElementById('comp-total').textContent = fmtNum(summary.total_components);
+  document.getElementById('comp-zones').textContent = fmtNum(summary.total_zones) + ' zones';
   document.getElementById('comp-critical').textContent = summary.critical_count;
   document.getElementById('comp-total-cost').textContent = fmtCurrency(summary.total_renewal_cost);
-  // approximate avg age
-  document.getElementById('comp-avg-life').textContent = '—';
 }
 
 // ── Utils ────────────────────────────────────────────────────
