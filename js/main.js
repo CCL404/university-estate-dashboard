@@ -10,8 +10,10 @@ let COMP_SORT_COL = null;
 let COMP_SORT_DIR = 'asc';
 
 // ── Load data ────────────────────────────────────────────────
+const CACHE_BUST = new Date().getTime();
+
 async function loadData(path) {
-  const res = await fetch(path);
+  const res = await fetch(path + '?t=' + CACHE_BUST);
   const json = await res.json();
   DATA = json;
   return json;
@@ -19,7 +21,7 @@ async function loadData(path) {
 
 async function loadComponents(path) {
   try {
-    const res = await fetch(path);
+    const res = await fetch(path + '?t=' + CACHE_BUST);
     const json = await res.json();
     COMP_DATA = json;
     return json;
