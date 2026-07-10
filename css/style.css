@@ -234,6 +234,29 @@ a:hover { text-decoration: underline; }
   line-height: 1.5;
 }
 
+/* ── Swinburne Application Box ─────────────────────────────── */
+.swin-app-box {
+  padding: 1rem 1.25rem;
+  background: var(--accent-light);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  margin-bottom: 0;
+}
+.swin-app-label {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+.swin-app-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
 /* ── KPIs ──────────────────────────────────────────────────── */
 .kpi-grid {
   display: grid;
