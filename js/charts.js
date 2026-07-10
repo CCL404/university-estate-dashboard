@@ -402,10 +402,65 @@ function renderSustainabilityCharts(sustJson) {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y.toLocaleString() + 'k kg CO2-e' } } },
       scales: { x: { grid: { display: false }, ticks: { font: { size: 9, family: 'Inter' }, color: CHART_COLORS.text, maxRotation: 45 } }, y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 }, color: CHART_COLORS.text } } } },
   });
+  // Normalise mixed-unit environmental KPIs — show as % of typical university building targets
+  const energyVal = summary.avg_energy_kwh_per_sqm;
+  const waterVal = Math.round(summary.total_water_kl / summary.total_sqm * 100) / 100;
+  const wasteVal = Math.round(summary.total_waste_kg / summary.total_sqm);
+  const energyPct = Math.min(100, Math.round(energyVal / 250 * 100));
+  const waterPct = Math.min(100, Math.round(waterVal / 3 * 100));
+  const wastePct = Math.min(100, Math.round(wasteVal / 10 * 100));
+
   new Chart(document.getElementById('chart-sust-kpi'), {
     type: 'bar',
-    data: { labels: ['Energy (kWh/sqm)', 'Water (kL/sqm)', 'Waste (kg/sqm)'], datasets: [{ data: [summary.avg_energy_kwh_per_sqm, Math.round(summary.total_water_kl / summary.total_sqm * 100) / 100, Math.round(summary.total_waste_kg / summary.total_sqm)], backgroundColor: ['#2c5f6e','#5b8a9c','#8db4c4'], borderRadius: 0, barThickness: 50 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-      scales: { x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 }, color: CHART_COLORS.text } }, y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 }, color: CHART_COLORS.text } } } },
+    data: {
+      labels: ['Energy Efficiency', 'Water Efficiency', 'Waste Intensity'],
+      datasets: [{
+        data: [energyPct, waterPct, wastePct],
+        backgroundColor: ['#2c5f6e','#5b8a9c','#8db4c4'],
+        borderRadius: 0,
+        barThickness: 44
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const vals = [energyVal + ' kWh/sqm', waterVal + ' kL/sqm', wasteVal + ' kg/sqm'];
+              return vals[ctx.dataIndex] + '  (' + ctx.raw + '% of target)';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          max: 100,
+          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { font: { size: 10 }, color: CHART_COLORS.text, callback: v => v + '%' }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { family: 'Inter', size: 10 }, color: CHART_COLORS.text }
+        }
+      }
+    },
+    plugins: [{
+      id: 'sustLabels',
+      afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        const meta = chart.getDatasetMeta(0);
+        ctx.font = '600 10px Inter';
+        ctx.fillStyle = '#111';
+        ctx.textAlign = 'left';
+        meta.data.forEach((bar, i) => {
+          const vals = [energyVal + ' kWh/sqm', waterVal + ' kL/sqm', wasteVal + ' kg/sqm'];
+          ctx.fillText(vals[i], bar.x + 8, bar.y + 4);
+        });
+      }
+    }]
   });
 }
